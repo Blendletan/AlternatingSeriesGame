@@ -20,6 +20,11 @@ button { padding: 0.5rem 1rem; margin-right: 1rem; }
 <div class="stats">
 <div><strong>Target:</strong> <span id="target"></span></div>
 <div><strong>Current Sum:</strong> <span id="current">0</span></div>
+<div><strong>Error:</strong> <span id="error">0</span></div>
+<div><strong>Next Positive Term:</strong> <span id="nextPos"></span></div>
+<div><strong>Next Negative Term:</strong> <span id="nextNeg"></span></div>
+</div>
+<div><strong>Current Sum:</strong> <span id="current">0</span></div>
 <div><strong>Next Positive Term:</strong> <span id="nextPos"></span></div>
 <div><strong>Next Negative Term:</strong> <span id="nextNeg"></span></div>
 </div>
@@ -53,6 +58,7 @@ function updateDisplay() {
 nextPosEl.textContent = (1 / nPos).toFixed(12);
 nextNegEl.textContent = (-1 / nNeg).toFixed(12);
 currentEl.textContent = current.toFixed(12);
+document.getElementById('error').textContent = Math.abs(current - target).toFixed(12);
 }
 
 
