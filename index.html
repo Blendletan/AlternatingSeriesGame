@@ -3,24 +3,22 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<title>Alternating Harmonic Game</title>
+<title>Alternating Harmonic Game — Arbitrary Precision</title>
 <style>
-body { font-family: sans-serif; padding: 2rem; max-width: 600px; margin: auto; }
-h1 { margin-bottom: 1rem; }
+body { font-family: sans-serif; padding: 2rem; max-width: 700px; margin: auto; }
 .stats { margin: 1rem 0; }
 button { padding: 0.5rem 1rem; margin-right: 1rem; }
-.buttons { margin-top: 1rem; }
 </style>
 </head>
 <body>
-<h1>Alternating Harmonic Series Game</h1>
-<p>Try to reach the target by choosing the next positive or negative term of the alternating harmonic series.</p>
+<h1>Alternating Harmonic Series Game (Arbitrary Precision)</h1>
+<p>All sums use exact rational arithmetic with BigInt.</p>
 
 
 <div class="stats">
 <div><strong>Target:</strong> <span id="target"></span></div>
-<div><strong>Current Sum:</strong> <span id="current">0</span></div>
-<div><strong>Error:</strong> <span id="error">0</span></div>
+<div><strong>Current Sum:</strong> <span id="current"></span></div>
+<div><strong>Error:</strong> <span id="error"></span></div>
 <div><strong>Next Positive Term:</strong> <span id="nextPos"></span></div>
 <div><strong>Next Negative Term:</strong> <span id="nextNeg"></span></div>
 </div>
@@ -33,41 +31,92 @@ button { padding: 0.5rem 1rem; margin-right: 1rem; }
 
 
 <script>
-let nPos = 1; // next positive index
-let nNeg = 2; // next negative index
-let current = 0;
+// --- Rational Arithmetic (BigInt) ---
+function gcd(a, b) {
+a = a < 0n ? -a : a;
+b = b < 0n ? -b : b;
+while (b !== 0n) [a, b] = [b, a % b];
+return a;
+}
 
 
-const target = (Math.random()).toFixed(12); // random target in [-2,2]
+function norm([n, d]) {
+const g = gcd(n, d);
+d = d / g;
+n = n / g;
+if (d < 0n) { n = -n; d = -d; }
+return [n, d];
+}
 
 
+function add(a, b) {
+return norm([a[0]*b[1] + b[0]*a[1], a[1]*b[1]]);
+}
+
+
+function sub(a, b) {
+return norm([a[0]*b[1] - b[0]*a[1], a[1]*b[1]]);
+}
+
+
+function toDecimal([n, d], digits = 30) {
+const factor = 10n ** BigInt(digits);
+const scaled = (n * factor) / d;
+const s = scaled.toString();
+const intPart = s.length > digits ? s.slice(0, -digits) : '0';
+const frac = s.padStart(digits, '0').slice(-digits);
+return intPart + "." + frac;
+}
+
+
+// --- Game State ---
+let nPos = 1n;
+let nNeg = 2n;
+let current = [0n, 1n];
+
+
+// random target in [-2,2], expressed as rational with scale 10^30
+const DIGITS = 30;
+const scale = 10n ** BigInt(DIGITS);
+const rand = Math.random(); // double
+const target = norm([BigInt(Math.floor(rand * Number(scale))), scale]);
+
+
+// elements
 const targetEl = document.getElementById('target');
 const currentEl = document.getElementById('current');
+const errorEl = document.getElementById('error');
 const nextPosEl = document.getElementById('nextPos');
 const nextNegEl = document.getElementById('nextNeg');
 
 
-targetEl.textContent = target;
+function displayR(r) {
+return toDecimal(r, 30);
+}
 
 
 function updateDisplay() {
-nextPosEl.textContent = (1 / nPos).toFixed(12);
-nextNegEl.textContent = (-1 / nNeg).toFixed(12);
-currentEl.textContent = current.toFixed(12);
-document.getElementById('error').textContent = Math.abs(current - target).toFixed(12);
+nextPosEl.textContent = displayR([1n, nPos]);
+nextNegEl.textContent = displayR([-1n, nNeg]);
+currentEl.textContent = displayR(current);
+const err = sub(current, target);
+// absolute value
+const absErr = err[0] < 0n ? [-err[0], err[1]] : err;
+errorEl.textContent = displayR(absErr);
+targetEl.textContent = displayR(target);
 }
 
 
 document.getElementById('usePos').onclick = () => {
-current += 1 / nPos;
-nPos += 2; // positive terms: 1,3,5,...
+current = add(current, [1n, nPos]);
+nPos += 2n;
 updateDisplay();
 };
 
 
 document.getElementById('useNeg').onclick = () => {
-current -= 1 / nNeg;
-nNeg += 2; // negative terms: 2,4,6,...
+current = add(current, [-1n, nNeg]);
+nNeg += 2n;
 updateDisplay();
 };
 
