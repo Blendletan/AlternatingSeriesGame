@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Alternating Harmonic Game</title>
+<style>
+body { font-family: sans-serif; padding: 2rem; max-width: 600px; margin: auto; }
+h1 { margin-bottom: 1rem; }
+.stats { margin: 1rem 0; }
+button { padding: 0.5rem 1rem; margin-right: 1rem; }
+.buttons { margin-top: 1rem; }
+</style>
+</head>
+<body>
+<h1>Alternating Harmonic Series Game</h1>
+<p>Try to reach the target by choosing the next positive or negative term of the alternating harmonic series.</p>
+
+
+<div class="stats">
+<div><strong>Target:</strong> <span id="target"></span></div>
+<div><strong>Current Sum:</strong> <span id="current">0</span></div>
+<div><strong>Next Positive Term:</strong> <span id="nextPos"></span></div>
+<div><strong>Next Negative Term:</strong> <span id="nextNeg"></span></div>
+</div>
+
+
+<div class="buttons">
+<button id="usePos">Use Positive Term</button>
+<button id="useNeg">Use Negative Term</button>
+</div>
+
+
+<script>
+let nPos = 1; // next positive index
+let nNeg = 2; // next negative index
+let current = 0;
+
+
+const target = (Math.random()).toFixed(12); // random target in [-2,2]
+
+
+const targetEl = document.getElementById('target');
+const currentEl = document.getElementById('current');
+const nextPosEl = document.getElementById('nextPos');
+const nextNegEl = document.getElementById('nextNeg');
+
+
+targetEl.textContent = target;
+
+
+function updateDisplay() {
+nextPosEl.textContent = (1 / nPos).toFixed(12);
+nextNegEl.textContent = (-1 / nNeg).toFixed(12);
+currentEl.textContent = current.toFixed(12);
+}
+
+
+document.getElementById('usePos').onclick = () => {
+current += 1 / nPos;
+nPos += 2; // positive terms: 1,3,5,...
+updateDisplay();
+};
+
+
+document.getElementById('useNeg').onclick = () => {
+current -= 1 / nNeg;
+nNeg += 2; // negative terms: 2,4,6,...
+updateDisplay();
+};
+
+
+updateDisplay();
+</script>
+</body>
+</html>
